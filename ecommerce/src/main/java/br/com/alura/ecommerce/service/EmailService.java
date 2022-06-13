@@ -46,9 +46,6 @@ public class EmailService {
         properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
         properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        // consumers obrigatoriamente devem conter o groupId. Isso garante que ele vai receber todas as mensagens do tópico
-        // por isso cada consumer tem seu grupo, importante ser único para conseguir saber quais mensagens esse serviço
-        // consumiu
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, EmailService.class.getSimpleName());
         return properties;
     }
