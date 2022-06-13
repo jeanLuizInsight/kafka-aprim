@@ -7,6 +7,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static java.lang.System.getProperties;
@@ -17,11 +18,12 @@ import static java.lang.System.getProperties;
 public class NewOrderMain {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         var producer = new KafkaProducer<String, String>(getProperties());
+        var key = UUID.randomUUID().toString();
         var value = "132123,67523,345654647";
         // registro: topico, chave, valor
-        var record = new ProducerRecord<>("ECOMMERCE_NEW_ORDER", value, value);
+        var record = new ProducerRecord<>("ECOMMERCE_NEW_ORDER", key, value);
         var email = "Seu pedido está sendo processado.";
-        var emailRecord = new ProducerRecord<>("ECOMMERCE_SEND_EMAIL", email, email);
+        var emailRecord = new ProducerRecord<>("ECOMMERCE_SEND_EMAIL", key, email);
         // o método send retorna um Future, ou seja, não blocante sem esperar a execução terminar
         // para tal utilizar o get()
         // producer.send(record);
