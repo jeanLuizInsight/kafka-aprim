@@ -35,7 +35,7 @@ public class NewOrderMain {
     }
 
     /**
-     * Propriedades para registro do consumer.
+     * Propriedades para registro do producer.
      * @return
      */
     private static Properties getProperties() {
