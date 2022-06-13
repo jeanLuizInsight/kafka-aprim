@@ -1,5 +1,6 @@
 package br.com.alura.ecommerce;
 
+import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -19,11 +20,13 @@ public class NewOrderMain {
         var value = "132123,67523,345654647";
         // registro: topico, chave, valor
         var record = new ProducerRecord<>("ECOMMERCE_NEW_ORDER", value, value);
+        var email = "Seu pedido está sendo processado.";
+        var emailRecord = new ProducerRecord<>("ECOMMERCE_SEND_EMAIL", email, email);
         // o método send retorna um Future, ou seja, não blocante sem esperar a execução terminar
         // para tal utilizar o get()
         // producer.send(record);
         // variação com callback
-        producer.send(record, (data, ex) -> {
+        Callback callback = (data, ex) -> {
             if (ex != null) {
                 ex.printStackTrace();
                 return;
@@ -31,7 +34,12 @@ public class NewOrderMain {
             System.out.println("mensagem enviada com sucesso: " + data.topic() +
                     "::partition " + data.partition() +
                     "/ offset " + data.offset());
-        }).get();
+        };
+        // produzindo notificação para nova ordem
+        producer.send(record, callback).get();
+        // produzindo notificações para email
+        producer.send(emailRecord, callback).get();
+
     }
 
     /**
