@@ -5,11 +5,11 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 /**
  * Classe service bridge para realizar chamada consumer ao Kafka
@@ -20,9 +20,19 @@ public class KafkaService implements Closeable {
     private final ConsumerFunction parse;
 
     public KafkaService(String groupId, String topic, ConsumerFunction parse) {
+        this(groupId, parse);
+        consumer.subscribe(Collections.singletonList(topic));
+    }
+    public KafkaService(String groupId, Pattern topic, ConsumerFunction parse) {
+        this(groupId, parse);
+        // escutando o tópico
+        // obs.: aqui vai escutar mais de um, com regex
+        this.consumer.subscribe(topic);
+    }
+
+    private KafkaService(String groupId, ConsumerFunction parse) {
         this.parse = parse;
         this.consumer = new KafkaConsumer<>(getProperties(groupId));
-        consumer.subscribe(Collections.singletonList(topic));
     }
 
     public void run() {
