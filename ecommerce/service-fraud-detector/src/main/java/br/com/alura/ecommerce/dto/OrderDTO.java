@@ -11,4 +11,24 @@ public class OrderDTO {
         this.orderId = orderId;
         this.amount = amount;
     }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public String getOrderId() {
+        return orderId;
+    }
+
+    @Override
+    public String toString() {
+        return "OrderDTO{" +
+                "userId='" + userId + '\'' +
+                ", orderId='" + orderId + '\'' +
+                '}';
+    }
 }

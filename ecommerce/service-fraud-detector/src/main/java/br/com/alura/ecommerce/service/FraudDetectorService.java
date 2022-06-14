@@ -3,10 +3,15 @@ package br.com.alura.ecommerce.service;
 import br.com.alura.ecommerce.dto.OrderDTO;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
+import java.math.BigDecimal;
+import java.util.concurrent.ExecutionException;
+
 /**
  * Serviço para consumir o tópico de novas ordens e verificar se existe fraude.
  */
 public class FraudDetectorService {
+
+    private final KafkaDispatcher<OrderDTO> orderDispatcher = new KafkaDispatcher<>();
 
     public static void main(String[] args) {
         var fraudService = new FraudDetectorService();
@@ -18,7 +23,7 @@ public class FraudDetectorService {
         }
     }
 
-    private void parse(ConsumerRecord<String, OrderDTO> record) {
+    private void parse(ConsumerRecord<String, OrderDTO> record) throws ExecutionException, InterruptedException {
         System.out.println("----------------");
         System.out.println("processing new order, checking for fraud...");
         System.out.println(record.key());
@@ -31,6 +36,21 @@ public class FraudDetectorService {
         } catch (InterruptedException e) {
             // Do not...
         }
-        System.out.println("order processed!");
+        var order = record.value();
+        if (this.isFraud(order)) {
+            System.out.println("Ordem é uma fraude!");
+            orderDispatcher.send("ECOMMERCE_ORDER_REJECTED",
+                    order.getUserId(),
+                    order);
+        } else {
+            System.out.println("Ordem aprovada!");
+            orderDispatcher.send("ECOMMERCE_ORDER_APPROVED",
+                    order.getUserId(),
+                    order);
+        }
+    }
+
+    private boolean isFraud(final OrderDTO order) {
+        return order.getAmount().compareTo(new BigDecimal("4500")) >= 0;
     }
 }
