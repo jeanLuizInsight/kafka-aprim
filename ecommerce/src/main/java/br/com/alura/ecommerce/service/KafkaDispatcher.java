@@ -14,12 +14,12 @@ import java.util.concurrent.ExecutionException;
 /**
  * Classe service Bridge para produzir mensagens no kafka
  */
-public class KafkaDispatcher implements Closeable {
+public class KafkaDispatcher<T> implements Closeable {
 
-    private final KafkaProducer<String, String> producer;
+    private final KafkaProducer<String, T> producer;
 
     public KafkaDispatcher() {
-        this.producer = new KafkaProducer<String, String>(getProperties());
+        this.producer = new KafkaProducer<>(getProperties());
     }
 
     /**
@@ -34,7 +34,7 @@ public class KafkaDispatcher implements Closeable {
         return properties;
     }
 
-    public void send(String topico, String key, String value) throws ExecutionException, InterruptedException {
+    public void send(String topico, String key, T value) throws ExecutionException, InterruptedException {
         // registro: topico, chave, valor
         var record = new ProducerRecord<>(topico, key, value);
         Callback callback = (data, ex) -> {
