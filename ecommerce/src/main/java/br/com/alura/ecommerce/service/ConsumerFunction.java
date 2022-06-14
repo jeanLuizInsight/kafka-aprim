@@ -5,7 +5,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 /**
  * Contrato padrão para utilizar função de consumir no tópico
  */
-public interface ConsumerFunction {
+public interface ConsumerFunction<T> {
 
-    void consume(ConsumerRecord<String, String> record);
+    void consume(ConsumerRecord<String, T> record);
 }
