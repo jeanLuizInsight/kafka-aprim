@@ -18,10 +18,11 @@ public class NewOrderMain {
                     var userId = UUID.randomUUID().toString();
                     var orderId = UUID.randomUUID().toString();
                     var amount = Math.random() * 5000 + 1;
-                    var dto = new OrderDTO(userId, orderId, new BigDecimal(amount));
+                    var email = Math.random() + "@email.com";
+                    var dto = new OrderDTO(userId, orderId, new BigDecimal(amount), email);
                     dispatcher.send("ECOMMERCE_NEW_ORDER", userId, dto);
-                    var email = "Seu pedido está sendo processado.";
-                    emailDispatcher.send("ECOMMERCE_SEND_EMAIL", userId, email);
+                    var emailMsg = "Seu pedido está sendo processado.";
+                    emailDispatcher.send("ECOMMERCE_SEND_EMAIL", userId, emailMsg);
                 }
             }
         }
