@@ -14,15 +14,14 @@ public class NewOrderMain {
         // garantindo que qualquer exception irá fechar o recurso do producer
         try(var dispatcher = new KafkaDispatcher<OrderDTO>()) {
             try(var emailDispatcher = new KafkaDispatcher<String>()) {
+                var email = Math.random() + "@email.com";
                 for (var i = 0; i < 10; i++) {
-                    var userId = UUID.randomUUID().toString();
                     var orderId = UUID.randomUUID().toString();
                     var amount = Math.random() * 5000 + 1;
-                    var email = Math.random() + "@email.com";
-                    var dto = new OrderDTO(userId, orderId, new BigDecimal(amount), email);
-                    dispatcher.send("ECOMMERCE_NEW_ORDER", userId, dto);
+                    var dto = new OrderDTO(orderId, new BigDecimal(amount), email);
+                    dispatcher.send("ECOMMERCE_NEW_ORDER", email, dto);
                     var emailMsg = "Seu pedido está sendo processado.";
-                    emailDispatcher.send("ECOMMERCE_SEND_EMAIL", userId, emailMsg);
+                    emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email, emailMsg);
                 }
             }
         }

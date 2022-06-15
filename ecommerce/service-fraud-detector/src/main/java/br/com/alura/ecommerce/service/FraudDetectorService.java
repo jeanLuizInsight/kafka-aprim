@@ -40,12 +40,12 @@ public class FraudDetectorService {
         if (this.isFraud(order)) {
             System.out.println("Ordem é uma fraude!");
             orderDispatcher.send("ECOMMERCE_ORDER_REJECTED",
-                    order.getUserId(),
+                    order.getEmail(),
                     order);
         } else {
             System.out.println("Ordem aprovada!");
             orderDispatcher.send("ECOMMERCE_ORDER_APPROVED",
-                    order.getUserId(),
+                    order.getEmail(),
                     order);
         }
     }
