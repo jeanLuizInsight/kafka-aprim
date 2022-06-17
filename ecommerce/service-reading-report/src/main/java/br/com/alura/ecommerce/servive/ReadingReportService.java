@@ -1,7 +1,6 @@
 package br.com.alura.ecommerce.servive;
 
 import br.com.alura.ecommerce.dto.UserDTO;
-import br.com.alura.ecommerce.service.KafkaDispatcher;
 import br.com.alura.ecommerce.service.KafkaService;
 import br.com.alura.ecommerce.utils.IO;
 import br.com.alura.ecommerce.utils.Message;
@@ -14,13 +13,12 @@ import java.util.concurrent.ExecutionException;
 
 public class ReadingReportService {
 
-    private final KafkaDispatcher<UserDTO> orderDispatcher = new KafkaDispatcher<>();
     private static final Path SOURCE = new File("src/main/resources/report.txt").toPath();
 
     public static void main(String[] args) {
         var reportService = new ReadingReportService();
         try(var service = new KafkaService<>(ReadingReportService.class.getSimpleName(),
-                "USER_GENERATE_READING_REPORT",
+                "ECOMMERCE_USER_GENERATE_READING_REPORT",
                 reportService::parse,
                 UserDTO.class)) {
             service.run();

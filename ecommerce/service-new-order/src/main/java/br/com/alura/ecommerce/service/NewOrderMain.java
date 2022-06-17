@@ -1,6 +1,7 @@
 package br.com.alura.ecommerce.service;
 
 import br.com.alura.ecommerce.dto.OrderDTO;
+import br.com.alura.ecommerce.utils.CorrelationID;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -19,9 +20,15 @@ public class NewOrderMain {
                     var orderId = UUID.randomUUID().toString();
                     var amount = Math.random() * 5000 + 1;
                     var dto = new OrderDTO(orderId, new BigDecimal(amount), email);
-                    dispatcher.send("ECOMMERCE_NEW_ORDER", email, dto);
+                    dispatcher.send("ECOMMERCE_NEW_ORDER",
+                            email,
+                            dto,
+                            new CorrelationID(NewOrderMain.class.getSimpleName()));
                     var emailMsg = "Seu pedido está sendo processado.";
-                    emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email, emailMsg);
+                    emailDispatcher.send("ECOMMERCE_SEND_EMAIL",
+                            email,
+                            emailMsg,
+                            new CorrelationID(NewOrderMain.class.getSimpleName()));
                 }
             }
         }

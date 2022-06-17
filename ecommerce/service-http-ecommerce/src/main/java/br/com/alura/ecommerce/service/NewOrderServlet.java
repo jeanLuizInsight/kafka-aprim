@@ -1,6 +1,7 @@
 package br.com.alura.ecommerce.service;
 
 import br.com.alura.ecommerce.dto.OrderDTO;
+import br.com.alura.ecommerce.utils.CorrelationID;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -36,9 +37,15 @@ public class NewOrderServlet extends HttpServlet {
             var amount = req.getParameter("amount");
             var orderId = UUID.randomUUID().toString();
             var dto = new OrderDTO(orderId, new BigDecimal(amount), email);
-            dispatcher.send("ECOMMERCE_NEW_ORDER", email, dto);
+            dispatcher.send("ECOMMERCE_NEW_ORDER",
+                    email,
+                    dto,
+                    new CorrelationID(NewOrderServlet.class.getSimpleName()));
             var emailMsg = "Seu pedido está sendo processado.";
-            emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email, emailMsg);
+            emailDispatcher.send("ECOMMERCE_SEND_EMAIL",
+                    email,
+                    emailMsg,
+                    new CorrelationID(NewOrderServlet.class.getSimpleName()));
 
             System.out.println("Nova ordem enviada com sucesso!");
             resp.setStatus(HttpServletResponse.SC_OK);
