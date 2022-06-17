@@ -1,6 +1,7 @@
 package br.com.alura.ecommerce.service;
 
 import br.com.alura.ecommerce.dto.UserDTO;
+import br.com.alura.ecommerce.utils.Message;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.sql.Connection;
@@ -27,21 +28,22 @@ public class BatchSendMessageService {
 
     public static void main(String[] args) throws SQLException {
         var batchService = new BatchSendMessageService();
-        try(var service = new KafkaService<String>(BatchSendMessageService.class.getSimpleName(),
+        try(var service = new KafkaService<>(BatchSendMessageService.class.getSimpleName(),
                 "SEND_MESSAGE_TO_ALL_USERS",
                 batchService::parse,
                 String.class)) {
             service.run();
         }
     }
-    private void parse(ConsumerRecord<String, String> record) throws SQLException {
+    private void parse(ConsumerRecord<String, Message<String>> record) throws SQLException {
+        var message = record.value();
         System.out.println("----------------");
         System.out.println("processing new batch...");
-        System.out.println("Topic " + record.value());
+        System.out.println("Topic " + message);
         List<UserDTO> users = this.getUsers();
         users.forEach(user -> {
             try {
-                userDispatcher.send(record.value(),
+                userDispatcher.send(message.getPayload(),
                         user.getUuid(),
                         user);
             } catch (ExecutionException | InterruptedException e) {

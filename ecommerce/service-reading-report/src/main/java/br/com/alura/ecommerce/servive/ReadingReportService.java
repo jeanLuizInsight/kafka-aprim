@@ -4,6 +4,7 @@ import br.com.alura.ecommerce.dto.UserDTO;
 import br.com.alura.ecommerce.service.KafkaDispatcher;
 import br.com.alura.ecommerce.service.KafkaService;
 import br.com.alura.ecommerce.utils.IO;
+import br.com.alura.ecommerce.utils.Message;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.io.File;
@@ -18,7 +19,7 @@ public class ReadingReportService {
 
     public static void main(String[] args) {
         var reportService = new ReadingReportService();
-        try(var service = new KafkaService<UserDTO>(ReadingReportService.class.getSimpleName(),
+        try(var service = new KafkaService<>(ReadingReportService.class.getSimpleName(),
                 "USER_GENERATE_READING_REPORT",
                 reportService::parse,
                 UserDTO.class)) {
@@ -26,11 +27,12 @@ public class ReadingReportService {
         }
     }
 
-    private void parse(ConsumerRecord<String, UserDTO> record) throws ExecutionException, InterruptedException, IOException {
+    private void parse(ConsumerRecord<String, Message<UserDTO>> record) throws ExecutionException, InterruptedException, IOException {
+        var message = record.value();
         System.out.println("----------------");
         System.out.println("processing report for " + record.value());
 
-        var user = record.value();
+        var user = message.getPayload();
         var target = new File(user.getReportPath());
         IO.copyTo(SOURCE, target);
         IO.append(target, "Created for " + user.getUuid());

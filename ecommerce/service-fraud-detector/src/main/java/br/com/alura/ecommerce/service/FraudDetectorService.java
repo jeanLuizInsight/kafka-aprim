@@ -1,6 +1,7 @@
 package br.com.alura.ecommerce.service;
 
 import br.com.alura.ecommerce.dto.OrderDTO;
+import br.com.alura.ecommerce.utils.Message;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.math.BigDecimal;
@@ -15,7 +16,7 @@ public class FraudDetectorService {
 
     public static void main(String[] args) {
         var fraudService = new FraudDetectorService();
-        try(var service = new KafkaService<OrderDTO>(FraudDetectorService.class.getSimpleName(),
+        try(var service = new KafkaService<>(FraudDetectorService.class.getSimpleName(),
                 "ECOMMERCE_NEW_ORDER",
                 fraudService::parse,
                 OrderDTO.class)) {
@@ -23,7 +24,8 @@ public class FraudDetectorService {
         }
     }
 
-    private void parse(ConsumerRecord<String, OrderDTO> record) throws ExecutionException, InterruptedException {
+    private void parse(ConsumerRecord<String, Message<OrderDTO>> record) throws ExecutionException, InterruptedException {
+        var message = record.value();
         System.out.println("----------------");
         System.out.println("processing new order, checking for fraud...");
         System.out.println(record.key());
@@ -36,7 +38,7 @@ public class FraudDetectorService {
         } catch (InterruptedException e) {
             // Do not...
         }
-        var order = record.value();
+        var order = message.getPayload();
         if (this.isFraud(order)) {
             System.out.println("Ordem é uma fraude!");
             orderDispatcher.send("ECOMMERCE_ORDER_REJECTED",

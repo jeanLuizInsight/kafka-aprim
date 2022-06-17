@@ -1,6 +1,7 @@
 package br.com.alura.ecommerce.service;
 
 import br.com.alura.ecommerce.dto.OrderDTO;
+import br.com.alura.ecommerce.utils.Message;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.sql.Connection;
@@ -25,19 +26,20 @@ public class CreateUserService {
 
     public static void main(String[] args) throws SQLException {
         var userService = new CreateUserService();
-        try(var service = new KafkaService<OrderDTO>(CreateUserService.class.getSimpleName(),
+        try(var service = new KafkaService<>(CreateUserService.class.getSimpleName(),
                 "ECOMMERCE_NEW_ORDER",
                 userService::parse,
                 OrderDTO.class)) {
             service.run();
         }
     }
-    private void parse(ConsumerRecord<String, OrderDTO> record) throws ExecutionException, InterruptedException, SQLException {
+    private void parse(ConsumerRecord<String, Message<OrderDTO>> record) throws ExecutionException, InterruptedException, SQLException {
+        var message = record.value();
         System.out.println("----------------");
         System.out.println("processing new order, checking for new user...");
         System.out.println(record.key());
         System.out.println(record.value());
-        var order = record.value();
+        var order = message.getPayload();
         if (this.isNewUser(order.getEmail())) {
             this.insertNewUser(order.getEmail());
         }
