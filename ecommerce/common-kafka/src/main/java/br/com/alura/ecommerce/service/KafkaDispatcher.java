@@ -3,15 +3,13 @@ package br.com.alura.ecommerce.service;
 import br.com.alura.ecommerce.utils.CorrelationID;
 import br.com.alura.ecommerce.utils.GsonSerializer;
 import br.com.alura.ecommerce.utils.Message;
-import org.apache.kafka.clients.producer.Callback;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.io.Closeable;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * Classe service Bridge para produzir mensagens no kafka
@@ -37,10 +35,18 @@ public class KafkaDispatcher<T> implements Closeable {
         return properties;
     }
 
-    public void send(String topico, String key, T payload, CorrelationID correlationId) throws ExecutionException, InterruptedException {
-        var value = new Message<>(correlationId, payload);
+    @Override
+    public void close() {
+        producer.close();
+    }
+
+    private ProducerRecord<String, Message<T>> getProducerRecord(String topico, String key, T payload, CorrelationID correlationId) {
+        var value = new Message<T>(correlationId, payload);
         // registro: topico, chave, valor
-        var record = new ProducerRecord<>(topico, key, value);
+        return new ProducerRecord<String, Message<T>>(topico, key, value);
+    }
+
+    private Callback getCallback() {
         Callback callback = (data, ex) -> {
             if (ex != null) {
                 ex.printStackTrace();
@@ -50,11 +56,20 @@ public class KafkaDispatcher<T> implements Closeable {
                     "::partition " + data.partition() +
                     "/ offset " + data.offset());
         };
-        producer.send(record, callback).get();
+        return callback;
     }
 
-    @Override
-    public void close() {
-        producer.close();
+    public void send(String topico, String key, T payload, CorrelationID correlationId) throws ExecutionException, InterruptedException {
+        var record = this.getProducerRecord(topico, key, payload, correlationId);
+        var callback = this.getCallback();
+        producer.send(record, callback).get();
     }
+    public Future<RecordMetadata> sendAssync(String topico, String key, T payload, CorrelationID correlationId) throws ExecutionException, InterruptedException {
+        var record = this.getProducerRecord(topico, key, payload, correlationId);
+        var callback = this.getCallback();
+        return producer.send(record, callback);
+    }
+
+
+
 }
