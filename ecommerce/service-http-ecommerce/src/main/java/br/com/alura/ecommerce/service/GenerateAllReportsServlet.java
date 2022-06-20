@@ -1,5 +1,6 @@
 package br.com.alura.ecommerce.service;
 
+import br.com.alura.ecommerce.dispatcher.KafkaDispatcher;
 import br.com.alura.ecommerce.utils.CorrelationID;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;

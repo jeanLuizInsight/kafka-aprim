@@ -1,7 +1,6 @@
-package br.com.alura.ecommerce.service;
+package br.com.alura.ecommerce.dispatcher;
 
 import br.com.alura.ecommerce.utils.CorrelationID;
-import br.com.alura.ecommerce.utils.GsonSerializer;
 import br.com.alura.ecommerce.utils.Message;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;

@@ -1,6 +1,7 @@
 package br.com.alura.ecommerce.service;
 
 import br.com.alura.ecommerce.dto.OrderDTO;
+import br.com.alura.ecommerce.consumer.KafkaService;
 import br.com.alura.ecommerce.utils.Message;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
