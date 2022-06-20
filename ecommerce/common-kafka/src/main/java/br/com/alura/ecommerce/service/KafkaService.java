@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 /**
@@ -38,18 +39,24 @@ public class KafkaService<T> implements Closeable {
         this.consumer = new KafkaConsumer<>(getProperties(groupId, overrideProperties));
     }
 
-    public void run() {
-        while (true) {
-            var records = consumer.poll(Duration.ofMillis(100));
-            if (!records.isEmpty()) {
-                System.out.println("Encontrei " + records.count() + " registros.");
-                records.forEach(record -> {
-                    try {
-                        parse.consume(record);
-                    } catch (Exception e) {
-                        // Do not...
+    public void run() throws ExecutionException, InterruptedException {
+        try(var deadletterDispatcher = new KafkaDispatcher<String>()) {
+            while (true) {
+                var records = consumer.poll(Duration.ofMillis(100));
+                if (!records.isEmpty()) {
+                    System.out.println("Encontrei " + records.count() + " registros.");
+                    for (var record : records) {
+                        try {
+                            parse.consume(record);
+                        } catch (Exception e) {
+                            var message = record.value();
+                            deadletterDispatcher.send("ECOMMERCE_DEADLETTER",
+                                    message.getId().toString(),
+                                    message.toString(),
+                                    message.getId().continueWith("DeadLetter"));
+                        }
                     }
-                });
+                }
             }
         }
     }

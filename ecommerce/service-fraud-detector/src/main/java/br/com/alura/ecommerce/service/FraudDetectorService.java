@@ -4,6 +4,7 @@ import br.com.alura.ecommerce.dto.OrderDTO;
 import br.com.alura.ecommerce.utils.Message;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.concurrent.ExecutionException;
 
@@ -14,7 +15,7 @@ public class FraudDetectorService {
 
     private final KafkaDispatcher<OrderDTO> orderDispatcher = new KafkaDispatcher<>();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
         var fraudService = new FraudDetectorService();
         try(var service = new KafkaService<>(FraudDetectorService.class.getSimpleName(),
                 "ECOMMERCE_NEW_ORDER",

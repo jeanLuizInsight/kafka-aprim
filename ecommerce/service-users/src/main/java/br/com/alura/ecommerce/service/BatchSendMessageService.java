@@ -4,6 +4,7 @@ import br.com.alura.ecommerce.dto.UserDTO;
 import br.com.alura.ecommerce.utils.Message;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -26,7 +27,7 @@ public class BatchSendMessageService {
         }
     }
 
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException, ExecutionException, InterruptedException, IOException {
         var batchService = new BatchSendMessageService();
         try(var service = new KafkaService<>(BatchSendMessageService.class.getSimpleName(),
                 "ECOMMERCE_SEND_MESSAGE_TO_ALL_USERS",

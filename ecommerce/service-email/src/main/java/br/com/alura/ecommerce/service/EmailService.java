@@ -3,9 +3,12 @@ package br.com.alura.ecommerce.service;
 import br.com.alura.ecommerce.utils.Message;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+
 public class EmailService {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
         var emailService = new EmailService();
         try(var service = new KafkaService<>(EmailService.class.getSimpleName(),
                 "ECOMMERCE_SEND_EMAIL",
