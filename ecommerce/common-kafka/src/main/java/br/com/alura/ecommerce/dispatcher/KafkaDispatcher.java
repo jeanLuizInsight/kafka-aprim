@@ -40,7 +40,7 @@ public class KafkaDispatcher<T> implements Closeable {
     }
 
     private ProducerRecord<String, Message<T>> getProducerRecord(String topico, String key, T payload, CorrelationID correlationId) {
-        var value = new Message<T>(correlationId, payload);
+        var value = new Message<T>(correlationId.continueWith("_" + topico), payload);
         // registro: topico, chave, valor
         return new ProducerRecord<String, Message<T>>(topico, key, value);
     }
