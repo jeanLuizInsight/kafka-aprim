@@ -6,19 +6,21 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
-public class EmailService {
+public class EmailService implements ConsumerService<String> {
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
-        var emailService = new EmailService();
-        try(var service = new KafkaService<>(EmailService.class.getSimpleName(),
-                "ECOMMERCE_SEND_EMAIL",
-                emailService::parse)) {
-            service.run();
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        // executando 10 serviços de e-mail em paralelo
+        var serviceProvider = new ServiceProvider(EmailService::new);
+        var pool = Executors.newFixedThreadPool(10);
+        for (var i = 0; i < 10; i++) {
+            serviceProvider.call();
         }
     }
 
-    private void parse(ConsumerRecord<String, Message<String>> record) {
+    @Override
+    public void parse(ConsumerRecord<String, Message<String>> record) {
         var message = record.value();
         System.out.println("----------------");
         System.out.println("processing send email...");
@@ -33,5 +35,15 @@ public class EmailService {
             // Do not...
         }
         System.out.println("email processed!");
+    }
+
+    @Override
+    public String getTopic() {
+        return "ECOMMERCE_SEND_EMAIL";
+    }
+
+    @Override
+    public String getConsumerGroup() {
+        return EmailService.class.getSimpleName();
     }
 }
