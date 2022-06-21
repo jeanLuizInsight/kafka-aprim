@@ -1,5 +1,7 @@
 package br.com.alura.ecommerce.service;
 
+import br.com.alura.ecommerce.consumer.ConsumerService;
+import br.com.alura.ecommerce.consumer.ServiceProvider;
 import br.com.alura.ecommerce.dto.OrderDTO;
 import br.com.alura.ecommerce.consumer.KafkaService;
 import br.com.alura.ecommerce.utils.Message;
@@ -11,8 +13,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
-public class CreateUserService {
+public class CreateUserService implements ConsumerService<OrderDTO> {
 
     private final Connection connection;
 
@@ -26,15 +29,14 @@ public class CreateUserService {
         }
     }
 
-    public static void main(String[] args) throws SQLException, ExecutionException, InterruptedException, IOException {
-        var userService = new CreateUserService();
-        try(var service = new KafkaService<>(CreateUserService.class.getSimpleName(),
-                "ECOMMERCE_NEW_ORDER",
-                userService::parse)) {
-            service.run();
-        }
+    public static void main(String[] args) throws SQLException, ExecutionException, InterruptedException {
+        var serviceProvider = new ServiceProvider(CreateUserService::new);
+        var pool = Executors.newFixedThreadPool(1);
+        serviceProvider.call();
     }
-    private void parse(ConsumerRecord<String, Message<OrderDTO>> record) throws ExecutionException, InterruptedException, SQLException {
+
+    @Override
+    public void parse(ConsumerRecord<String, Message<OrderDTO>> record) throws SQLException {
         var message = record.value();
         System.out.println("----------------");
         System.out.println("processing new order, checking for new user...");
@@ -44,6 +46,16 @@ public class CreateUserService {
         if (this.isNewUser(order.getEmail())) {
             this.insertNewUser(order.getEmail());
         }
+    }
+
+    @Override
+    public String getTopic() {
+        return "ECOMMERCE_NEW_ORDER";
+    }
+
+    @Override
+    public String getConsumerGroup() {
+        return CreateUserService.class.getSimpleName();
     }
 
     private void insertNewUser(final String email) throws SQLException {

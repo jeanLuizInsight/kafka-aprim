@@ -1,14 +1,16 @@
-package br.com.alura.ecommerce.service;
+package br.com.alura.ecommerce.consumer;
 
 import br.com.alura.ecommerce.utils.Message;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+
+import java.sql.SQLException;
 
 /**
  * Interface para provedor de um serviço consumer
  * @param <T>
  */
 public interface ConsumerService<T> {
-    void parse(ConsumerRecord<String, Message<T>> record);
+    void parse(ConsumerRecord<String, Message<T>> record) throws SQLException;
     String getTopic();
     String getConsumerGroup();
 }

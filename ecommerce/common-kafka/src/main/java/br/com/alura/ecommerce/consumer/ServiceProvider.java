@@ -1,6 +1,4 @@
-package br.com.alura.ecommerce.service;
-
-import br.com.alura.ecommerce.consumer.KafkaService;
+package br.com.alura.ecommerce.consumer;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
