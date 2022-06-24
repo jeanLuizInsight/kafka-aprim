@@ -19,7 +19,7 @@ public class CreateUserService implements ConsumerService<OrderDTO> {
 
     private final Connection connection;
 
-    public CreateUserService() throws SQLException {
+    private CreateUserService() throws SQLException {
         String url = "jdbc:sqlite:target/users_database.db";
         this.connection = DriverManager.getConnection(url);
         try {

@@ -1,5 +1,7 @@
 package br.com.alura.ecommerce.service;
 
+import br.com.alura.ecommerce.consumer.ConsumerService;
+import br.com.alura.ecommerce.consumer.ServiceProvider;
 import br.com.alura.ecommerce.dto.OrderDTO;
 import br.com.alura.ecommerce.consumer.KafkaService;
 import br.com.alura.ecommerce.dispatcher.KafkaDispatcher;
@@ -8,25 +10,26 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
 /**
  * Serviço para consumir o tópico de novas ordens e verificar se existe fraude.
  */
-public class FraudDetectorService {
+public class FraudDetectorService implements ConsumerService<OrderDTO> {
 
     private final KafkaDispatcher<OrderDTO> orderDispatcher = new KafkaDispatcher<>();
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
-        var fraudService = new FraudDetectorService();
-        try(var service = new KafkaService<>(FraudDetectorService.class.getSimpleName(),
-                "ECOMMERCE_NEW_ORDER",
-                fraudService::parse)) {
-            service.run();
-        }
+    public static void main(String[] args) throws ExecutionException, InterruptedException, SQLException {
+        var serviceProvider = new ServiceProvider(FraudDetectorService::new);
+        var pool = Executors.newFixedThreadPool(1);
+        serviceProvider.call();
+
     }
 
-    private void parse(ConsumerRecord<String, Message<OrderDTO>> record) throws ExecutionException, InterruptedException {
+    @Override
+    public void parse(ConsumerRecord<String, Message<OrderDTO>> record) throws ExecutionException, InterruptedException {
         var message = record.value();
         System.out.println("----------------");
         System.out.println("processing new order, checking for fraud...");
@@ -54,6 +57,16 @@ public class FraudDetectorService {
                     order,
                     message.getId().continueWith(FraudDetectorService.class.getSimpleName()));
         }
+    }
+
+    @Override
+    public String getTopic() {
+        return "ECOMMERCE_NEW_ORDER";
+    }
+
+    @Override
+    public String getConsumerGroup() {
+        return FraudDetectorService.class.getSimpleName();
     }
 
     private boolean isFraud(final OrderDTO order) {

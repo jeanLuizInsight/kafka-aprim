@@ -5,12 +5,13 @@ import br.com.alura.ecommerce.consumer.ServiceProvider;
 import br.com.alura.ecommerce.utils.Message;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
+import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 public class EmailService implements ConsumerService<String> {
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args) throws ExecutionException, InterruptedException, SQLException {
         // executando 10 serviços de e-mail em paralelo
         var serviceProvider = new ServiceProvider(EmailService::new);
         var pool = Executors.newFixedThreadPool(10);

@@ -36,7 +36,7 @@ public class NewOrderServlet extends HttpServlet {
         try {
             var email = req.getParameter("email");
             var amount = req.getParameter("amount");
-            var orderId = UUID.randomUUID().toString();
+            var orderId = req.getParameter("uuid");
             var dto = new OrderDTO(orderId, new BigDecimal(amount), email);
             dispatcher.send("ECOMMERCE_NEW_ORDER",
                     email,
